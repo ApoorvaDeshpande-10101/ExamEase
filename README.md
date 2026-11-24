@@ -13,7 +13,7 @@
 
 ## 💡 About the Project
 
-ExamEase 2.0 is a web-based platform that simplifies online examination management.
+ExamEase is a web-based platform that simplifies online examination management.
 
 It provides administrators with tools to create and manage examinations, while students can attempt timed assessments, submit answers, and track their results through a single platform.
 
@@ -169,4 +169,4 @@ Computer Engineering Student
 
 ⭐ If you find this project interesting, consider giving it a star!
 
-**ExamEase 2.0 - Making online examinations simpler and smarter.**
+**ExamEase - Making online examinations simpler and smarter.**
