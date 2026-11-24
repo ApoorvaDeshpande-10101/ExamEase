@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${isEdit != null && isEdit ? 'Edit Question | ExamEase' : 'Add Question | ExamEase'}">Question Form | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- Admin Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="brand-logo">Exam<span>Ease</span>.</a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-label">Admin Control</div>
+            <a href="/admin/dashboard" class="sidebar-item">
+                <span>📊</span> Overview
+            </a>
+            <a href="/admin/exams" class="sidebar-item active">
+                <span>📝</span> Examinations
+            </a>
+            <a href="/admin/students" class="sidebar-item">
+                <span>👥</span> Students
+            </a>
+            <a href="/admin/analytics" class="sidebar-item">
+                <span>📈</span> Analytics & Reports
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-badge">
+                <div class="user-avatar" style="background: var(--navy);" th:text="${#strings.substring(admin.name, 0, 1)}">A</div>
+                <div class="user-info">
+                    <div class="user-name" th:text="${admin.name}">Administrator</div>
+                    <div class="user-role">System Admin</div>
+                </div>
+            </div>
+            <a href="/logout" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 12px;">Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-navbar">
+            <div>
+                <a th:href="@{/admin/exams/{id}/questions(id=${exam.id})}" style="font-size: 13px; color: var(--muted); margin-bottom: 2px; display: inline-block;">
+                    ← Back to Questions of "<span th:text="${exam.title}">Exam</span>"
+                </a>
+                <h1 class="page-title" th:text="${isEdit != null && isEdit ? 'Edit Question' : 'Add Multiple-Choice Question'}">Question Form</h1>
+            </div>
+        </header>
+
+        <div class="content-body">
+
+            <!-- Flash Error Notification -->
+            <div class="alert alert-danger" th:if="${errorMessage != null}">
+                <span>⚠️</span>
+                <span th:text="${errorMessage}">Error notification</span>
+            </div>
+
+            <div class="card" style="max-width: 750px; margin: 0 auto;">
+                <div class="card-header">
+                    <h2 class="card-title">Question & Answer Configuration</h2>
+                    <span class="badge badge-info" th:text="${exam.title}">Exam Title</span>
+                </div>
+                <div class="card-body">
+                    <form th:action="${isEdit != null && isEdit ? '/admin/exams/' + exam.id + '/questions/' + question.id + '/edit' : '/admin/exams/' + exam.id + '/questions/add'}" method="post">
+
+                        <div class="form-group">
+                            <label class="form-label" for="questionText">Question Statement *</label>
+                            <textarea id="questionText" name="questionText" class="form-control" rows="3"
+                                      placeholder="Type or paste the complete question text here..."
+                                      th:text="${question.questionText}" required autofocus></textarea>
+                        </div>
+
+                        <!-- 4 Options -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="optionA">Option A *</label>
+                                <input type="text" id="optionA" name="optionA" class="form-control"
+                                       placeholder="Enter Option A text"
+                                       th:value="${question.optionA}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="optionB">Option B *</label>
+                                <input type="text" id="optionB" name="optionB" class="form-control"
+                                       placeholder="Enter Option B text"
+                                       th:value="${question.optionB}" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="optionC">Option C *</label>
+                                <input type="text" id="optionC" name="optionC" class="form-control"
+                                       placeholder="Enter Option C text"
+                                       th:value="${question.optionC}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="optionD">Option D *</label>
+                                <input type="text" id="optionD" name="optionD" class="form-control"
+                                       placeholder="Enter Option D text"
+                                       th:value="${question.optionD}" required>
+                            </div>
+                        </div>
+
+                        <!-- Answer & Marks -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="correctAnswer">Select Correct Answer *</label>
+                                <select id="correctAnswer" name="correctAnswer" class="form-select" required>
+                                    <option value="">-- Choose correct option --</option>
+                                    <option value="A" th:selected="${question.correctAnswer == 'A'}">Option A</option>
+                                    <option value="B" th:selected="${question.correctAnswer == 'B'}">Option B</option>
+                                    <option value="C" th:selected="${question.correctAnswer == 'C'}">Option C</option>
+                                    <option value="D" th:selected="${question.correctAnswer == 'D'}">Option D</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="marks">Question Marks *</label>
+                                <input type="number" id="marks" name="marks" class="form-control"
+                                       min="1" max="100"
+                                       placeholder="1"
+                                       th:value="${question.marks != null && question.marks > 0 ? question.marks : 1}" required>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                            <a th:href="@{/admin/exams/{id}/questions(id=${exam.id})}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary" th:text="${isEdit != null && isEdit ? 'Save Changes' : 'Add Question'}">Add Question</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

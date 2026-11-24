@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExamEase | Online Examination System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- Public Top Navigation -->
+<nav class="navbar">
+    <a href="/" class="brand-logo">Exam<span>Ease</span>.</a>
+    <ul class="nav-links">
+        <li th:if="${loggedInUser == null}">
+            <a href="/login" class="btn btn-outline btn-sm">Student Login</a>
+        </li>
+        <li th:if="${loggedInUser == null}">
+            <a href="/admin/login" class="btn btn-secondary btn-sm">Admin Portal</a>
+        </li>
+        <li th:if="${loggedInUser != null && loggedInUser.role == 'STUDENT'}">
+            <a href="/student/dashboard" class="btn btn-primary btn-sm">Go to Dashboard</a>
+        </li>
+        <li th:if="${loggedInUser != null && loggedInUser.role == 'ADMIN'}">
+            <a href="/admin/dashboard" class="btn btn-primary btn-sm">Admin Dashboard</a>
+        </li>
+    </ul>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="pill-badge">
+        ✨ Smarter Learning. Instant Evaluation.
+    </div>
+
+    <h1 class="hero-title">
+        Test your knowledge.<br>
+        <span>Discover your potential.</span>
+    </h1>
+
+    <p class="hero-subtitle">
+        ExamEase is an advanced, distraction-free online examination platform built for seamless student evaluations, automated scoring, real-time timer tracking, and insightful academic performance analytics.
+    </p>
+
+    <div class="hero-actions">
+        <a href="/login" class="btn btn-primary btn-lg">Student Login</a>
+        <a href="/register" class="btn btn-outline btn-lg">Register as Student</a>
+        <a href="/admin/login" class="btn btn-secondary btn-lg">Admin Login</a>
+    </div>
+</section>
+
+<!-- Features Grid -->
+<section class="features-grid">
+    <div class="feature-card">
+        <div class="feature-icon">⏱️</div>
+        <h3>Real-Time Timed Exams</h3>
+        <p>Dynamic countdown timers synchronized strictly with backend server validation to guarantee academic integrity.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Instant Evaluation</h3>
+        <p>Immediate server-side score calculation, correct answer analysis, pass/fail status, and percentage breakdown.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Performance Analytics</h3>
+        <p>Comprehensive student and administrator dashboards powered by modern Java Streams for deep academic insights.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">💾</div>
+        <h3>Persistent File Storage</h3>
+        <p>Robust object serialization maintaining exams, students, attempts, and historical results across restarts.</p>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2026 ExamEase Online Examination System. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examination Instructions | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-light">
+
+<nav class="navbar">
+    <a href="/" class="brand-logo">Exam<span>Ease</span>.</a>
+    <div style="font-size: 14px; color: var(--navy); font-weight: 600;">
+        Candidate: <span th:text="${student.name}" style="color: var(--primary);">Student Name</span>
+    </div>
+</nav>
+
+<div style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+
+    <div class="card" style="padding: 36px;">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div class="pill-badge">Instructions & Guidelines</div>
+            <h1 style="font-size: 28px; font-weight: 800; color: var(--navy); margin-bottom: 8px;" th:text="${exam.title}">Java Programming Fundamentals</h1>
+            <p style="color: var(--muted); font-size: 15px;" th:text="${exam.description}">Assessment description goes here.</p>
+        </div>
+
+        <!-- Exam Overview Grid -->
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 30px;">
+            <div class="stat-card" style="padding: 16px; flex-direction: column; align-items: flex-start;">
+                <div class="stat-info">
+                    <div class="stat-label">Duration</div>
+                    <div class="stat-value" style="font-size: 22px;" th:text="${exam.duration + ' mins'}">15 mins</div>
+                </div>
+            </div>
+            <div class="stat-card" style="padding: 16px; flex-direction: column; align-items: flex-start;">
+                <div class="stat-info">
+                    <div class="stat-label">Total Questions</div>
+                    <div class="stat-value" style="font-size: 22px;" th:text="${exam.questions.size()}">5</div>
+                </div>
+            </div>
+            <div class="stat-card" style="padding: 16px; flex-direction: column; align-items: flex-start;">
+                <div class="stat-info">
+                    <div class="stat-label">Maximum Marks</div>
+                    <div class="stat-value" style="font-size: 22px;" th:text="${exam.totalMarks}">5</div>
+                </div>
+            </div>
+            <div class="stat-card" style="padding: 16px; flex-direction: column; align-items: flex-start;">
+                <div class="stat-info">
+                    <div class="stat-label">Passing Marks</div>
+                    <div class="stat-value" style="font-size: 22px; color: var(--primary);" th:text="${exam.passingMarks}">3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules & Instructions List -->
+        <div style="background: var(--bg-light); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; margin-bottom: 32px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 14px;">Important Examination Guidelines:</h3>
+            <ul style="padding-left: 20px; font-size: 14px; color: var(--navy-light); line-height: 1.8;">
+                <li>The countdown timer starts immediately once you click the <strong>"Start Examination Now"</strong> button below.</li>
+                <li>All questions are <strong>Multiple-Choice Questions (MCQs)</strong> with four options and one single correct answer.</li>
+                <li>You can navigate between questions at any time using the <strong>Previous</strong> and <strong>Next</strong> buttons or the Question Navigation Palette.</li>
+                <li>You can <strong>Mark Questions for Review</strong> to return to them easily prior to final submission.</li>
+                <li>Your chosen answers are <strong>automatically saved in the background</strong>. If you refresh or close the tab, you can return as long as time remains.</li>
+                <li>When the countdown timer expires, your examination will be <strong>automatically evaluated and submitted</strong> by the system.</li>
+                <li>Do not click the browser back button or close the browser window unnecessarily during the exam session.</li>
+            </ul>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="/student/exams" class="btn btn-secondary">← Back to Available Exams</a>
+            <a th:href="@{/student/exams/{id}/start(id=${exam.id})}" class="btn btn-primary btn-lg">
+                I Understand, Start Examination Now →
+            </a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

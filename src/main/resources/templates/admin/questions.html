@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${'Questions - ' + exam.title + ' | ExamEase'}">Questions Management | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- Admin Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="brand-logo">Exam<span>Ease</span>.</a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-label">Admin Control</div>
+            <a href="/admin/dashboard" class="sidebar-item">
+                <span>📊</span> Overview
+            </a>
+            <a href="/admin/exams" class="sidebar-item active">
+                <span>📝</span> Examinations
+            </a>
+            <a href="/admin/students" class="sidebar-item">
+                <span>👥</span> Students
+            </a>
+            <a href="/admin/analytics" class="sidebar-item">
+                <span>📈</span> Analytics & Reports
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-badge">
+                <div class="user-avatar" style="background: var(--navy);" th:text="${#strings.substring(admin.name, 0, 1)}">A</div>
+                <div class="user-info">
+                    <div class="user-name" th:text="${admin.name}">Administrator</div>
+                    <div class="user-role">System Admin</div>
+                </div>
+            </div>
+            <a href="/logout" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 12px;">Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-navbar">
+            <div>
+                <a href="/admin/exams" style="font-size: 13px; color: var(--muted); margin-bottom: 2px; display: inline-block;">← Back to Examinations</a>
+                <h1 class="page-title" th:text="${'Questions: ' + exam.title}">Questions</h1>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a th:href="@{/admin/exams/{id}/questions/add(id=${exam.id})}" class="btn btn-primary btn-sm">+ Add Question</a>
+            </div>
+        </header>
+
+        <div class="content-body">
+
+            <!-- Flash Error / Success Notifications -->
+            <div class="alert alert-success" th:if="${successMessage != null}">
+                <span>✓</span>
+                <span th:text="${successMessage}">Success message</span>
+            </div>
+            <div class="alert alert-danger" th:if="${errorMessage != null}">
+                <span>⚠️</span>
+                <span th:text="${errorMessage}">Error notification</span>
+            </div>
+
+            <!-- Summary Bar -->
+            <div class="card" style="padding: 16px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; gap: 32px; font-size: 14px;">
+                    <div>Questions: <strong th:text="${questions.size()}">0</strong></div>
+                    <div>Total Marks: <strong th:text="${exam.totalMarks}">0</strong></div>
+                    <div>Passing Marks: <strong th:text="${exam.passingMarks}">3</strong></div>
+                    <div>Status: <span class="badge" th:classappend="${exam.published ? 'badge-success' : 'badge-warning'}" th:text="${exam.published ? 'Published' : 'Draft'}">Draft</span></div>
+                </div>
+                <form th:action="@{/admin/exams/{id}/toggle-publish(id=${exam.id})}" method="post">
+                    <button type="submit" class="btn btn-sm"
+                            th:classappend="${exam.published ? 'btn-outline' : 'btn-success'}"
+                            th:text="${exam.published ? 'Unpublish Exam' : 'Publish Exam'}">
+                        Publish
+                    </button>
+                </form>
+            </div>
+
+            <!-- Questions List -->
+            <div th:each="q, iter : ${questions}" class="card" style="margin-bottom: 20px;">
+                <div class="card-header" style="background: #f8fafc;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="badge badge-info" th:text="'Q' + ${iter.count}">Q1</span>
+                        <span class="badge badge-secondary" th:text="${q.marks + ' Mark' + (q.marks > 1 ? 's' : '')}">1 Mark</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <a th:href="@{/admin/exams/{id}/questions/{qId}/edit(id=${exam.id}, qId=${q.id})}" class="btn btn-secondary btn-sm">Edit</a>
+                        <form th:action="@{/admin/exams/{id}/questions/{qId}/delete(id=${exam.id}, qId=${q.id})}" method="post"
+                              onsubmit="return confirm('Are you sure you want to delete this question?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <p style="font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 20px;" th:text="${q.questionText}">
+                        Question Text will appear here.
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div style="padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);"
+                             th:styleappend="${q.correctAnswer == 'A' ? 'background: #ecfdf5; border-color: #10b981; font-weight: 700;' : 'background: #ffffff;'}">
+                            <strong>A:</strong> <span th:text="${q.optionA}">Option A text</span>
+                            <span th:if="${q.correctAnswer == 'A'}" style="color: var(--success); float: right;">✓ Correct Answer</span>
+                        </div>
+
+                        <div style="padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);"
+                             th:styleappend="${q.correctAnswer == 'B' ? 'background: #ecfdf5; border-color: #10b981; font-weight: 700;' : 'background: #ffffff;'}">
+                            <strong>B:</strong> <span th:text="${q.optionB}">Option B text</span>
+                            <span th:if="${q.correctAnswer == 'B'}" style="color: var(--success); float: right;">✓ Correct Answer</span>
+                        </div>
+
+                        <div style="padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);"
+                             th:styleappend="${q.correctAnswer == 'C' ? 'background: #ecfdf5; border-color: #10b981; font-weight: 700;' : 'background: #ffffff;'}">
+                            <strong>C:</strong> <span th:text="${q.optionC}">Option C text</span>
+                            <span th:if="${q.correctAnswer == 'C'}" style="color: var(--success); float: right;">✓ Correct Answer</span>
+                        </div>
+
+                        <div style="padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);"
+                             th:styleappend="${q.correctAnswer == 'D' ? 'background: #ecfdf5; border-color: #10b981; font-weight: 700;' : 'background: #ffffff;'}">
+                            <strong>D:</strong> <span th:text="${q.optionD}">Option D text</span>
+                            <span th:if="${q.correctAnswer == 'D'}" style="color: var(--success); float: right;">✓ Correct Answer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${questions.isEmpty()}" class="card" style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 48px; margin-bottom: 12px;">❓</div>
+                <h3 style="color: var(--navy); margin-bottom: 8px;">No Questions Added Yet</h3>
+                <p style="color: var(--muted); margin-bottom: 24px;">An examination requires questions before it can be published.</p>
+                <a th:href="@{/admin/exams/{id}/questions/add(id=${exam.id})}" class="btn btn-primary">
+                    + Add First Question
+                </a>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

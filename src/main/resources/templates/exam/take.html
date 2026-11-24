@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${exam.title + ' | ExamEase'}">Examination | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="background-color: var(--bg-light);">
+
+<!-- Top Sticky Examination Header -->
+<header class="exam-header">
+    <div>
+        <span class="brand-logo" style="font-size: 20px;">Exam<span>Ease</span>.</span>
+        <div style="font-size: 13px; color: var(--muted); font-weight: 600;" th:text="${exam.title}">Java Programming Fundamentals</div>
+    </div>
+
+    <!-- Countdown Timer Pill -->
+    <div class="timer-box" id="timerBox">
+        <span>⏱️ Time Remaining:</span>
+        <span id="timerDisplay">--:--</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 14px;">
+        <span style="font-size: 13px; color: var(--navy-light); font-weight: 600;" th:text="${student.name}">Student Name</span>
+        <button type="button" id="openSubmitModalBtn" class="btn btn-danger btn-sm">Submit Exam</button>
+    </div>
+</header>
+
+<!-- Hidden Parameters for JS Engine -->
+<input type="hidden" id="attemptId" th:value="${attempt.id}">
+<input type="hidden" id="totalQuestions" th:value="${totalQuestions}">
+<input type="hidden" id="initialRemainingSeconds" th:value="${remainingSeconds}">
+
+<!-- Examination Layout -->
+<div class="exam-container">
+
+    <!-- Active Question Panel -->
+    <div class="question-panel">
+        <form id="examForm" th:action="@{/student/exam/submit}" method="post">
+            <input type="hidden" name="attemptId" th:value="${attempt.id}">
+
+            <div th:each="q : ${questions}" th:id="'question-block-' + ${q.index}" class="question-block" style="display: none;">
+                <div class="question-header">
+                    <span class="question-num" th:text="'Question ' + ${q.index} + ' of ' + ${totalQuestions}">Question 1 of 5</span>
+                    <span class="badge badge-secondary" th:text="${q.marks + ' Mark' + (q.marks > 1 ? 's' : '')}">1 Mark</span>
+                </div>
+
+                <div class="question-text" th:text="${q.questionText}">
+                    Sample Question text will appear here.
+                </div>
+
+                <!-- 4 Options -->
+                <div class="options-container">
+                    <!-- Option A -->
+                    <label th:class="'option-label option-label-' + ${q.index} + (${selectedAnswers.get(q.id) == 'A'} ? ' selected' : '')">
+                        <input type="radio" th:name="'answers[' + ${q.id} + ']'" value="A"
+                               class="option-radio"
+                               th:attr="data-qid=${q.id}, data-qnum=${q.index}"
+                               th:checked="${selectedAnswers.get(q.id) == 'A'}"
+                               style="display: none;">
+                        <span class="option-badge">A</span>
+                        <span class="option-text" th:text="${q.optionA}">Option A text</span>
+                    </label>
+
+                    <!-- Option B -->
+                    <label th:class="'option-label option-label-' + ${q.index} + (${selectedAnswers.get(q.id) == 'B'} ? ' selected' : '')">
+                        <input type="radio" th:name="'answers[' + ${q.id} + ']'" value="B"
+                               class="option-radio"
+                               th:attr="data-qid=${q.id}, data-qnum=${q.index}"
+                               th:checked="${selectedAnswers.get(q.id) == 'B'}"
+                               style="display: none;">
+                        <span class="option-badge">B</span>
+                        <span class="option-text" th:text="${q.optionB}">Option B text</span>
+                    </label>
+
+                    <!-- Option C -->
+                    <label th:class="'option-label option-label-' + ${q.index} + (${selectedAnswers.get(q.id) == 'C'} ? ' selected' : '')">
+                        <input type="radio" th:name="'answers[' + ${q.id} + ']'" value="C"
+                               class="option-radio"
+                               th:attr="data-qid=${q.id}, data-qnum=${q.index}"
+                               th:checked="${selectedAnswers.get(q.id) == 'C'}"
+                               style="display: none;">
+                        <span class="option-badge">C</span>
+                        <span class="option-text" th:text="${q.optionC}">Option C text</span>
+                    </label>
+
+                    <!-- Option D -->
+                    <label th:class="'option-label option-label-' + ${q.index} + (${selectedAnswers.get(q.id) == 'D'} ? ' selected' : '')">
+                        <input type="radio" th:name="'answers[' + ${q.id} + ']'" value="D"
+                               class="option-radio"
+                               th:attr="data-qid=${q.id}, data-qnum=${q.index}"
+                               th:checked="${selectedAnswers.get(q.id) == 'D'}"
+                               style="display: none;">
+                        <span class="option-badge">D</span>
+                        <span class="option-text" th:text="${q.optionD}">Option D text</span>
+                    </label>
+                </div>
+
+                <!-- Auxiliary Controls (Mark for Review & Clear) -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--navy-light); cursor: pointer;">
+                        <input type="checkbox" th:id="'review-check-' + ${q.index}" class="review-checkbox"
+                               th:attr="data-qid=${q.id}, data-qnum=${q.index}"
+                               th:checked="${markedForReview.contains(q.id)}">
+                        <span>Mark for Review</span>
+                    </label>
+
+                    <button type="button" class="btn btn-secondary btn-sm clear-answer-btn"
+                            th:attr="data-qid=${q.id}, data-qnum=${q.index}">
+                        Clear Choice
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation Actions -->
+            <div class="exam-actions">
+                <button type="button" id="prevBtn" class="btn btn-secondary">← Previous Question</button>
+                <div style="font-size: 12px; color: var(--muted);">Answers are auto-saved automatically in background</div>
+                <button type="button" id="nextBtn" class="btn btn-primary">Next Question →</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Question Palette Navigation Sidebar -->
+    <aside class="palette-panel">
+        <h3 class="palette-title">Question Palette</h3>
+        <div class="palette-grid">
+            <button type="button"
+                    th:each="q : ${questions}"
+                    th:id="'palette-btn-' + ${q.index}"
+                    th:class="'palette-btn' + (${selectedAnswers.get(q.id) != null} ? ' answered' : '') + (${markedForReview.contains(q.id)} ? ' review' : '')"
+                    th:attr="data-qnum=${q.index}, data-qid=${q.id}"
+                    th:text="${q.index}">
+                1
+            </button>
+        </div>
+
+        <div class="palette-legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: var(--success);"></div>
+                <span>Answered</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: var(--warning);"></div>
+                <span>Marked for Review</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: var(--purple);"></div>
+                <span>Answered & Marked</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f8fafc; border: 1px solid var(--border);"></div>
+                <span>Not Visited / Unanswered</span>
+            </div>
+        </div>
+
+        <button type="button" onclick="document.getElementById('openSubmitModalBtn').click()"
+                class="btn btn-danger" style="width: 100%; margin-top: 24px;">
+            Finish & Submit Examination
+        </button>
+    </aside>
+
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal-overlay" id="submitModal">
+    <div class="modal-content">
+        <div style="font-size: 40px; margin-bottom: 12px;">📋</div>
+        <h3 class="modal-title">Ready to Submit?</h3>
+        <p class="modal-desc">Please review your attempt summary below before final submission. Once submitted, answers cannot be modified.</p>
+
+        <div style="background: var(--bg-light); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 24px; text-align: left; font-size: 14px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--muted);">Total Questions:</span>
+                <strong id="modalTotalQ">5</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--success); font-weight: 600;">Answered:</span>
+                <strong id="modalAnsweredQ" style="color: var(--success);">0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--warning); font-weight: 600;">Marked for Review:</span>
+                <strong id="modalReviewQ" style="color: var(--warning);">0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--danger); font-weight: 600;">Unanswered:</span>
+                <strong id="modalUnansweredQ" style="color: var(--danger);">0</strong>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" id="closeModalBtn" class="btn btn-secondary">Continue Examination</button>
+            <button type="button" id="confirmSubmitBtn" class="btn btn-danger">Confirm & Submit</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/exam.js}"></script>
+
+</body>
+</html>

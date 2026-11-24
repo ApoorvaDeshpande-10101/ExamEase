@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Analytics & Reports | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- Admin Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="brand-logo">Exam<span>Ease</span>.</a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-label">Admin Control</div>
+            <a href="/admin/dashboard" class="sidebar-item">
+                <span>📊</span> Overview
+            </a>
+            <a href="/admin/exams" class="sidebar-item">
+                <span>📝</span> Examinations
+            </a>
+            <a href="/admin/students" class="sidebar-item">
+                <span>👥</span> Students
+            </a>
+            <a href="/admin/analytics" class="sidebar-item active">
+                <span>📈</span> Analytics & Reports
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-badge">
+                <div class="user-avatar" style="background: var(--navy);" th:text="${#strings.substring(admin.name, 0, 1)}">A</div>
+                <div class="user-info">
+                    <div class="user-name" th:text="${admin.name}">Administrator</div>
+                    <div class="user-role">System Admin</div>
+                </div>
+            </div>
+            <a href="/logout" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 12px;">Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-navbar">
+            <h1 class="page-title">Academic Analytics & Performance Reports</h1>
+            <span class="badge badge-info" style="font-size: 13px;">Java Streams API Powered</span>
+        </header>
+
+        <div class="content-body">
+
+            <!-- High Level Metrics Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Total Submissions</div>
+                        <div class="stat-value" th:text="${stats.totalAttempts}">0</div>
+                    </div>
+                    <div class="stat-icon blue">📝</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Platform Average</div>
+                        <div class="stat-value" th:text="${stats.averageScore + '%'}">0%</div>
+                    </div>
+                    <div class="stat-icon purple">📊</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Overall Pass Rate</div>
+                        <div class="stat-value" style="color: var(--success);" th:text="${stats.passRate + '%'}">0%</div>
+                    </div>
+                    <div class="stat-icon green">🎯</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Highest Score</div>
+                        <div class="stat-value" style="color: var(--primary);" th:text="${stats.highestScore + '%'}">0%</div>
+                    </div>
+                    <div class="stat-icon orange">🏆</div>
+                </div>
+            </div>
+
+            <!-- Exam-Wise Performance Breakdown Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Examination-Wise Performance Breakdown</h2>
+                        <div style="font-size: 13px; color: var(--muted);">Processed via Java Streams groupingBy() and statistical aggregations</div>
+                    </div>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Examination Title</th>
+                                    <th>Total Attempts</th>
+                                    <th>Passed</th>
+                                    <th>Failed</th>
+                                    <th>Pass Rate</th>
+                                    <th>Average Score</th>
+                                    <th>Top Score</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="r : ${examReports}">
+                                    <td>
+                                        <strong th:text="${r.title}">Java Programming</strong>
+                                    </td>
+                                    <td>
+                                        <strong th:text="${r.attempts}">0</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-success" th:text="${r.passed}">0</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-danger" th:text="${r.failed}">0</span>
+                                    </td>
+                                    <td>
+                                        <strong style="color: var(--navy);" th:text="${r.passRate + '%'}">0%</strong>
+                                    </td>
+                                    <td th:text="${r.averageScore + '%'}">0%</td>
+                                    <td th:text="${r.highestScore + '%'}">0%</td>
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${r.published ? 'badge-success' : 'badge-warning'}"
+                                              th:text="${r.published ? 'Published' : 'Draft'}">Published</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${examReports.isEmpty()}">
+                                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--muted);">
+                                        No examinations available to analyze.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Scoring Submissions Table (Streams: sorted(descending)) -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Top Scoring Submissions</h2>
+                        <div style="font-size: 13px; color: var(--muted);">Ranked dynamically using Streams sorted(Comparator.comparing(Result::getPercentage).reversed())</div>
+                    </div>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Student</th>
+                                    <th>Examination</th>
+                                    <th>Score / Total</th>
+                                    <th>Percentage</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="top, iter : ${topResults}">
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${iter.count == 1 ? 'badge-warning' : 'badge-secondary'}"
+                                              th:text="'#' + ${iter.count}">#1</span>
+                                    </td>
+                                    <td th:text="${studentNames.get(top.studentId) != null ? studentNames.get(top.studentId) : 'Student'}">Student</td>
+                                    <td th:text="${examTitles.get(top.examId) != null ? examTitles.get(top.examId) : 'Exam'}">Exam</td>
+                                    <td th:text="${top.marksObtained + ' / ' + top.maximumMarks}">5 / 5</td>
+                                    <td>
+                                        <strong style="color: var(--primary);" th:text="${top.percentage + '%'}">100%</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${top.status == 'PASS' ? 'badge-success' : 'badge-danger'}"
+                                              th:text="${top.status}">PASS</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(top.submissionDate, 'dd MMM yyyy')}">23 Nov 2026</td>
+                                    <td>
+                                        <a th:href="@{/admin/results/{id}(id=${top.id})}" class="btn btn-secondary btn-sm">Inspect Attempt</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${topResults.isEmpty()}">
+                                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--muted);">
+                                        No submissions recorded yet.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

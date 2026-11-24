@@ -1,0 +1,520 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${isEdit != null && isEdit ? 'Edit Examination | ExamEase' : 'Create Examination | ExamEase'}">
+        Examination Form | ExamEase
+    </title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        .access-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .access-option input {
+            margin-top: 4px;
+            accent-color: var(--navy);
+        }
+
+        .access-option:hover {
+            border-color: var(--navy-light);
+        }
+
+        .access-option strong {
+            display: block;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+
+        .access-option small {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .student-selection {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .student-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .student-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .student-actions button {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            padding: 7px 11px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--navy);
+        }
+
+        .student-list {
+            max-height: 260px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .student-item:last-child {
+            border-bottom: none;
+        }
+
+        .student-item:hover {
+            background: var(--bg-light);
+        }
+
+        .student-item input {
+            accent-color: var(--navy);
+        }
+
+        .student-details strong {
+            display: block;
+            font-size: 13px;
+            color: var(--navy);
+        }
+
+        .student-details small {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .student-count {
+            font-size: 13px;
+            color: var(--navy);
+            font-weight: 600;
+        }
+
+        .no-students {
+            padding: 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- Admin Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="brand-logo">Exam<span>Ease</span>.</a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-label">Admin Control</div>
+
+            <a href="/admin/dashboard" class="sidebar-item">
+                <span>📊</span> Overview
+            </a>
+
+            <a href="/admin/exams" class="sidebar-item active">
+                <span>📝</span> Examinations
+            </a>
+
+            <a href="/admin/students" class="sidebar-item">
+                <span>👥</span> Students
+            </a>
+
+            <a href="/admin/analytics" class="sidebar-item">
+                <span>📈</span> Analytics & Reports
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-badge">
+                <div class="user-avatar"
+                     style="background: var(--navy);"
+                     th:text="${#strings.substring(admin.name, 0, 1)}">
+                    A
+                </div>
+
+                <div class="user-info">
+                    <div class="user-name" th:text="${admin.name}">
+                        Administrator
+                    </div>
+                    <div class="user-role">System Admin</div>
+                </div>
+            </div>
+
+            <a href="/logout"
+               class="btn btn-secondary btn-sm"
+               style="width: 100%; margin-top: 12px;">
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <header class="top-navbar">
+            <h1 class="page-title"
+                th:text="${isEdit != null && isEdit ? 'Edit Examination' : 'Create New Examination'}">
+                Examination Form
+            </h1>
+
+            <a href="/admin/exams" class="btn btn-secondary btn-sm">
+                ← Back to Exams
+            </a>
+        </header>
+
+        <div class="content-body">
+
+            <!-- Flash Error Notification -->
+            <div class="alert alert-danger" th:if="${errorMessage != null}">
+                <span>⚠️</span>
+                <span th:text="${errorMessage}">Error notification</span>
+            </div>
+
+            <div class="card" style="max-width: 700px; margin: 0 auto;">
+
+                <div class="card-header">
+                    <h2 class="card-title"
+                        th:text="${isEdit != null && isEdit ? 'Update Examination Information' : 'Enter Examination Details'}">
+                        Examination Details
+                    </h2>
+                </div>
+
+                <div class="card-body">
+
+                    <form th:action="${isEdit != null && isEdit ? '/admin/exams/' + exam.id + '/edit' : '/admin/exams/create'}"
+                          method="post">
+
+                        <!-- Examination Title -->
+                        <div class="form-group">
+                            <label class="form-label" for="title">
+                                Examination Title *
+                            </label>
+
+                            <input type="text"
+                                   id="title"
+                                   name="title"
+                                   class="form-control"
+                                   placeholder="e.g. Java Programming Fundamentals"
+                                   th:value="${exam.title}"
+                                   required
+                                   autofocus>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-group">
+                            <label class="form-label" for="description">
+                                Description
+                            </label>
+
+                            <textarea id="description"
+                                      name="description"
+                                      class="form-control"
+                                      placeholder="Provide an overview of the examination topics, objectives, or target audience..."
+                                      th:text="${exam.description}"
+                                      rows="3"></textarea>
+                        </div>
+
+                        <!-- Duration and Passing Marks -->
+                        <div class="form-row">
+
+                            <div class="form-group">
+                                <label class="form-label" for="duration">
+                                    Duration (Minutes) *
+                                </label>
+
+                                <input type="number"
+                                       id="duration"
+                                       name="duration"
+                                       class="form-control"
+                                       min="1"
+                                       max="300"
+                                       placeholder="15"
+                                       th:value="${exam.duration != null && exam.duration > 0 ? exam.duration : 15}"
+                                       required>
+
+                                <small style="font-size: 12px; color: var(--muted);">
+                                    Timer duration allocated to student.
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="passingMarks">
+                                    Passing Marks Required *
+                                </label>
+
+                                <input type="number"
+                                       id="passingMarks"
+                                       name="passingMarks"
+                                       class="form-control"
+                                       min="1"
+                                       max="1000"
+                                       placeholder="3"
+                                       th:value="${exam.passingMarks != null && exam.passingMarks > 0 ? exam.passingMarks : 3}"
+                                       required>
+
+                                <small style="font-size: 12px; color: var(--muted);">
+                                    Minimum marks required to pass.
+                                </small>
+                            </div>
+
+                        </div>
+
+                        <!-- Student Access Settings -->
+                        <div class="form-group">
+
+                            <label class="form-label">
+                                Examination Access
+                            </label>
+
+                            <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">
+                                Choose which students are allowed to attempt this examination.
+                            </p>
+
+                            <!-- All Students -->
+                            <label class="access-option">
+                                <input type="radio"
+                                       name="accessType"
+                                       value="ALL"
+                                       th:checked="${exam.accessType == null || exam.accessType == 'ALL'}"
+                                       onchange="toggleStudentSelection()">
+
+                                <span>
+                                    <strong>👥 All Students</strong>
+                                    <small>
+                                        Make this examination available to all registered students.
+                                    </small>
+                                </span>
+                            </label>
+
+                            <!-- Selected Students -->
+                            <label class="access-option">
+                                <input type="radio"
+                                       name="accessType"
+                                       value="SELECTED"
+                                       th:checked="${exam.accessType == 'SELECTED'}"
+                                       onchange="toggleStudentSelection()">
+
+                                <span>
+                                    <strong>🎯 Selected Students Only</strong>
+                                    <small>
+                                        Only the students selected below will be allowed to attempt this examination.
+                                    </small>
+                                </span>
+                            </label>
+
+                            <!-- Student Selection Area -->
+                            <div id="studentSelection"
+                                 class="student-selection"
+                                 th:style="${exam.accessType == 'SELECTED' ? 'display:block;' : 'display:none;'}">
+
+                                <div class="student-toolbar">
+
+                                    <div>
+                                        <strong style="color: var(--navy);">
+                                            Select Students
+                                        </strong>
+
+                                        <div class="student-count" id="selectedCount">
+                                            0 students selected
+                                        </div>
+                                    </div>
+
+                                    <div class="student-actions">
+                                        <button type="button" onclick="selectAllStudents()">
+                                            Select All
+                                        </button>
+
+                                        <button type="button" onclick="deselectAllStudents()">
+                                            Deselect All
+                                        </button>
+                                    </div>
+
+                                </div>
+
+                                <!-- Search Students -->
+                                <div class="form-group">
+                                    <input type="text"
+                                           id="studentSearch"
+                                           class="form-control"
+                                           placeholder="🔍 Search by student name or email..."
+                                           oninput="filterStudents()">
+                                </div>
+
+                                <!-- Student List -->
+                                <div class="student-list" id="studentList">
+
+                                    <div th:if="${#lists.isEmpty(students)}"
+                                         class="no-students">
+                                        No registered students found.
+                                    </div>
+
+                                    <label class="student-item"
+                                           th:each="student : ${students}"
+                                           th:attr="data-search=${#strings.toLowerCase(student.name + ' ' + student.email)}">
+
+                                        <input type="checkbox"
+                                               name="allowedStudentIds"
+                                               class="student-checkbox"
+                                               th:value="${student.id}"
+                                               th:checked="${exam.allowedStudentIds != null && exam.allowedStudentIds.contains(student.id)}"
+                                               onchange="updateSelectedCount()">
+
+                                        <span class="student-details">
+                                            <strong th:text="${student.name}">
+                                                Student Name
+                                            </strong>
+
+                                            <small th:text="${student.email}">
+                                                student@email.com
+                                            </small>
+                                        </span>
+
+                                    </label>
+
+                                </div>
+
+                                <p style="font-size: 12px; color: var(--muted); margin-top: 12px;">
+                                    Select at least one student before publishing an examination with restricted access.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Total Marks Note -->
+                        <div style="background: var(--bg-light); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 18px; margin-bottom: 24px; font-size: 13px; color: var(--navy-light);">
+                            ℹ️ <strong>Note on Total Marks:</strong>
+                            Maximum marks are automatically calculated as the sum of all individual question marks when questions are added.
+                        </div>
+
+                        <!-- Form Buttons -->
+                        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+
+                            <a href="/admin/exams" class="btn btn-secondary">
+                                Cancel
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary"
+                                    th:text="${isEdit != null && isEdit ? 'Save Changes' : 'Create & Proceed to Questions →'}">
+                                Submit
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- Student Selection JavaScript -->
+<script>
+
+    function toggleStudentSelection() {
+        const selectedOption = document.querySelector(
+            'input[name="accessType"]:checked'
+        );
+
+        const selectionArea = document.getElementById("studentSelection");
+
+        if (selectedOption && selectedOption.value === "SELECTED") {
+            selectionArea.style.display = "block";
+        } else {
+            selectionArea.style.display = "none";
+        }
+    }
+
+    function updateSelectedCount() {
+        const checkboxes = document.querySelectorAll(".student-checkbox");
+
+        const selectedCount = Array.from(checkboxes)
+            .filter(checkbox => checkbox.checked).length;
+
+        document.getElementById("selectedCount").textContent =
+            selectedCount + (selectedCount === 1
+                ? " student selected"
+                : " students selected");
+    }
+
+    function selectAllStudents() {
+        document.querySelectorAll(".student-item").forEach(item => {
+            if (item.style.display !== "none") {
+                const checkbox = item.querySelector(".student-checkbox");
+
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            }
+        });
+
+        updateSelectedCount();
+    }
+
+    function deselectAllStudents() {
+        document.querySelectorAll(".student-checkbox").forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        updateSelectedCount();
+    }
+
+    function filterStudents() {
+        const searchValue = document.getElementById("studentSearch")
+            .value.toLowerCase().trim();
+
+        document.querySelectorAll(".student-item").forEach(item => {
+            const studentDetails = item.getAttribute("data-search") || "";
+
+            item.style.display = studentDetails.includes(searchValue)
+                ? "flex"
+                : "none";
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        updateSelectedCount();
+        toggleStudentSelection();
+    });
+
+</script>
+
+</body>
+</html>

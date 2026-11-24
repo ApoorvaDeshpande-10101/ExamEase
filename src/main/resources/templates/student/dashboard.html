@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="brand-logo">Exam<span>Ease</span>.</a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-label">Student Menu</div>
+            <a href="/student/dashboard" class="sidebar-item active">
+                <span>📊</span> Dashboard
+            </a>
+            <a href="/student/exams" class="sidebar-item">
+                <span>📝</span> Available Exams
+            </a>
+            <a href="/student/results" class="sidebar-item">
+                <span>📈</span> My Results
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-badge">
+                <div class="user-avatar" th:text="${#strings.substring(student.name, 0, 1)}">S</div>
+                <div class="user-info">
+                    <div class="user-name" th:text="${student.name}">Student Name</div>
+                    <div class="user-role">Student</div>
+                </div>
+            </div>
+            <a href="/logout" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 12px;">Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-navbar">
+            <h1 class="page-title">Student Dashboard</h1>
+            <div style="font-size: 14px; color: var(--muted);">
+                Welcome back, <strong style="color: var(--navy);" th:text="${student.name}">Student</strong>
+            </div>
+        </header>
+
+        <div class="content-body">
+
+            <!-- Flash Error Message -->
+            <div class="alert alert-danger" th:if="${errorMessage != null}">
+                <span>⚠️</span>
+                <span th:text="${errorMessage}">Error notification</span>
+            </div>
+
+            <!-- Stats Overview Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Exams Attempted</div>
+                        <div class="stat-value" th:text="${stats.totalAttempts}">0</div>
+                    </div>
+                    <div class="stat-icon blue">📝</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Average Score</div>
+                        <div class="stat-value" th:text="${stats.averageScore + '%'}">0%</div>
+                    </div>
+                    <div class="stat-icon purple">📊</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Best Score</div>
+                        <div class="stat-value" th:text="${stats.bestScore + '%'}">0%</div>
+                    </div>
+                    <div class="stat-icon green">🏆</div>
+                </div>
+            </div>
+
+            <!-- Available Examinations Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Available Examinations</h2>
+                    <a href="/student/exams" class="btn btn-outline btn-sm">View All Exams →</a>
+                </div>
+                <div class="card-body">
+                    <div class="exam-grid" th:if="${!availableExams.isEmpty()}">
+                        <div class="exam-card" th:each="exam : ${availableExams}">
+                            <div>
+                                <h3 class="exam-card-title" th:text="${exam.title}">Java Programming</h3>
+                                <p class="exam-card-desc" th:text="${exam.description}">Exam description goes here.</p>
+                            </div>
+                            <div>
+                                <div class="exam-meta">
+                                    <div class="exam-meta-item">⏱️ <span th:text="${exam.duration + ' mins'}">15 mins</span></div>
+                                    <div class="exam-meta-item">❓ <span th:text="${exam.questions.size() + ' Questions'}">5 Questions</span></div>
+                                    <div class="exam-meta-item">🎯 Passing: <span th:text="${exam.passingMarks + ' marks'}">3 marks</span></div>
+                                </div>
+
+                                <div th:if="${attemptedExamIds.contains(exam.id)}">
+                                    <span class="badge badge-success" style="padding: 8px 14px; font-size: 13px;">✓ Already Completed</span>
+                                </div>
+                                <div th:unless="${attemptedExamIds.contains(exam.id)}">
+                                    <a th:href="@{/student/exams/{id}/instructions(id=${exam.id})}" class="btn btn-primary" style="width: 100%;">
+                                        Start Examination →
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${availableExams.isEmpty()}" style="text-align: center; padding: 40px 0; color: var(--muted);">
+                        <p>No examinations are currently active or published.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Result History Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Examination Results</h2>
+                    <a href="/student/results" class="btn btn-outline btn-sm">View Full History</a>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Examination</th>
+                                    <th>Date Attempted</th>
+                                    <th>Score / Total</th>
+                                    <th>Percentage</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="res : ${recentResults}">
+                                    <td>
+                                        <strong th:text="${examTitles.get(res.examId) != null ? examTitles.get(res.examId) : 'Examination'}">Exam Title</strong>
+                                    </td>
+                                    <td th:text="${#temporals.format(res.submissionDate, 'dd MMM yyyy, hh:mm a')}">23 Nov 2026</td>
+                                    <td th:text="${res.marksObtained + ' / ' + res.maximumMarks}">4 / 5</td>
+                                    <td>
+                                        <strong th:text="${res.percentage + '%'}">80%</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${res.status == 'PASS' ? 'badge-success' : 'badge-danger'}"
+                                              th:text="${res.status}">PASS</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/student/results/{id}(id=${res.id})}" class="btn btn-secondary btn-sm">View Breakdown</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${recentResults.isEmpty()}">
+                                    <td colspan="6" style="text-align: center; padding: 30px; color: var(--muted);">
+                                        You have not attempted any examinations yet.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

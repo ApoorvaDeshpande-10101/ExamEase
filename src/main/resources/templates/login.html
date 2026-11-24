@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="auth-wrapper">
+
+<div class="auth-card">
+    <div class="auth-header">
+        <a href="/" class="brand-logo" style="justify-content: center; margin-bottom: 12px;">Exam<span>Ease</span>.</a>
+        <h1>Student Login</h1>
+        <p>Enter your credentials to access your student dashboard</p>
+    </div>
+
+    <!-- Error message display -->
+    <div class="alert alert-danger" th:if="${error != null}">
+        <span>⚠️</span>
+        <span th:text="${error}">Invalid credentials</span>
+    </div>
+
+    <!-- Success message display -->
+    <div class="alert alert-success" th:if="${successMessage != null}">
+        <span>✓</span>
+        <span th:text="${successMessage}">Registration successful!</span>
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <div class="form-group">
+            <label class="form-label" for="email">Student Email</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="student@university.edu" th:value="${email}" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 8px;">Log In to Account</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted);">
+        Don't have an account? <a href="/register" style="font-weight: 600;">Register as Student</a>
+    </div>
+
+    <div style="text-align: center; margin-top: 14px; font-size: 13px;">
+        Are you an administrator? <a href="/admin/login" style="font-weight: 600; color: var(--navy-light);">Admin Portal</a>
+    </div>
+
+    <div style="text-align: center; margin-top: 16px;">
+        <a href="/" style="font-size: 13px; color: var(--muted-light);">← Back to Homepage</a>
+    </div>
+</div>
+
+</body>
+</html>

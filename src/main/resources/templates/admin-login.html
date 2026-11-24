@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Login | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="auth-wrapper">
+
+<div class="auth-card">
+    <div class="auth-header">
+        <a href="/" class="brand-logo" style="justify-content: center; margin-bottom: 12px;">Exam<span>Ease</span>.</a>
+        <h1>Administrator Portal</h1>
+        <p>Restricted access for academic administrators</p>
+    </div>
+
+    <!-- Error message display -->
+    <div class="alert alert-danger" th:if="${error != null}">
+        <span>⚠️</span>
+        <span th:text="${error}">Invalid credentials</span>
+    </div>
+
+    <!-- Demo Credentials Helper Note -->
+    <div class="alert alert-info" style="font-size: 13px;">
+        <span>ℹ️</span>
+        <div>
+            <strong>Default Admin Credentials:</strong><br>
+            Email: <code>admin@examease.com</code><br>
+            Password: <code>Admin@123</code>
+        </div>
+    </div>
+
+    <form th:action="@{/admin/login}" method="post">
+        <div class="form-group">
+            <label class="form-label" for="email">Admin Email</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="admin@examease.com" th:value="${email}" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="password">Admin Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 24px; font-size: 13px;">
+        Student wishing to take exams? <a href="/login" style="font-weight: 600;">Student Login</a>
+    </div>
+
+    <div style="text-align: center; margin-top: 16px;">
+        <a href="/" style="font-size: 13px; color: var(--muted-light);">← Back to Homepage</a>
+    </div>
+</div>
+
+</body>
+</html>

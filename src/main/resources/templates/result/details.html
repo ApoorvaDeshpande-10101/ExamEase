@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examination Result | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-light">
+
+<!-- Top Navigation -->
+<nav class="navbar">
+    <a href="/" class="brand-logo">Exam<span>Ease</span>.</a>
+    <div>
+        <a th:if="${student != null}" href="/student/dashboard" class="btn btn-secondary btn-sm">Return to Dashboard</a>
+        <a th:if="${admin != null}" href="/admin/dashboard" class="btn btn-secondary btn-sm">Return to Admin Dashboard</a>
+    </div>
+</nav>
+
+<div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+
+    <!-- Result Banner Card -->
+    <div class="card" style="padding: 36px; text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; margin-bottom: 16px;"
+             th:classappend="${result.status == 'PASS' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}"
+             th:style="${result.status == 'PASS' ? 'background: #ecfdf5; color: #10b981; font-size: 32px;' : 'background: #fef2f2; color: #ef4444; font-size: 32px;'}">
+            <span th:text="${result.status == 'PASS' ? '✓' : '✗'}">✓</span>
+        </div>
+
+        <h1 style="font-size: 26px; font-weight: 800; color: var(--navy); margin-bottom: 6px;" th:text="${exam.title}">Java Programming Fundamentals</h1>
+        <p style="color: var(--muted); font-size: 15px; margin-bottom: 20px;">
+            Candidate: <strong style="color: var(--navy);" th:text="${student != null ? student.name : 'Student'}">Candidate Name</strong> &bull;
+            Attempted on: <span th:text="${#temporals.format(result.submissionDate, 'dd MMMM yyyy, hh:mm a')}">23 Nov 2026</span>
+        </p>
+
+        <!-- Pass / Fail Badge -->
+        <div style="margin-bottom: 28px;">
+            <span class="badge"
+                  style="font-size: 16px; padding: 8px 24px;"
+                  th:classappend="${result.status == 'PASS' ? 'badge-success' : 'badge-danger'}"
+                  th:text="${result.status == 'PASS' ? 'PASSED' : 'FAILED'}">
+                PASSED
+            </span>
+        </div>
+
+        <!-- Metric Highlights Grid -->
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 10px;">
+            <div class="stat-card" style="padding: 16px; flex-direction: column; align-items: center; text-align: center;">
+                <div class="stat-info">
+                    <div class="stat-label">Marks Obtained</div>
+                    <div class="stat-value" style="font-size: 24px;" th:text="${result.marksObtained + ' / ' + result.maximumMarks}">4 / 5</div>
+                </div>
+            </div>
+            <div class="stat-card" style="padding: 16px; flex-direction: column; align-items: center; text-align: center;">
+                <div class="stat-info">
+                    <div class="stat-label">Percentage</div>
+                    <div class="stat-value" style="font-size: 24px; color: var(--primary);" th:text="${result.percentage + '%'}">80%</div>
+                </div>
+            </div>
+            <div class="stat-card" style="padding: 16px; flex-direction: column; align-items: center; text-align: center;">
+                <div class="stat-info">
+                    <div class="stat-label">Correct Answers</div>
+                    <div class="stat-value" style="font-size: 24px; color: var(--success);" th:text="${result.correctAnswers}">4</div>
+                </div>
+            </div>
+            <div class="stat-card" style="padding: 16px; flex-direction: column; align-items: center; text-align: center;">
+                <div class="stat-info">
+                    <div class="stat-label">Passing Required</div>
+                    <div class="stat-value" style="font-size: 24px;" th:text="${exam.passingMarks + ' marks'}">3 marks</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary Breakdown -->
+        <div style="display: flex; justify-content: center; gap: 32px; font-size: 14px; color: var(--muted); padding-top: 16px; border-top: 1px solid var(--border); margin-top: 20px;">
+            <div>Total Questions: <strong style="color: var(--navy);" th:text="${result.totalQuestions}">5</strong></div>
+            <div>Incorrect: <strong style="color: var(--danger);" th:text="${result.incorrectAnswers}">1</strong></div>
+            <div>Unanswered: <strong style="color: var(--navy);" th:text="${result.unansweredQuestions}">0</strong></div>
+        </div>
+    </div>
+
+    <!-- Question-by-Question Review Breakdown Section -->
+    <div class="card" th:if="${questionsReview != null && !questionsReview.isEmpty()}">
+        <div class="card-header">
+            <h2 class="card-title">Question-by-Question Review</h2>
+            <span style="font-size: 13px; color: var(--muted);">Academic Evaluation Breakdown</span>
+        </div>
+        <div class="card-body">
+            <div th:each="rev, iter : ${questionsReview}"
+                 style="background: var(--bg-light); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <strong style="color: var(--primary);" th:text="'Question ' + ${iter.count}">Question 1</strong>
+                    <div>
+                        <span class="badge"
+                              th:classappend="${rev.isCorrect ? 'badge-success' : (rev.isUnanswered ? 'badge-secondary' : 'badge-danger')}"
+                              th:text="${rev.isCorrect ? '✓ Correct (+ ' + rev.marksAwarded + ')' : (rev.isUnanswered ? 'Unanswered (0)' : '✗ Incorrect (0)')}">
+                            Correct
+                        </span>
+                    </div>
+                </div>
+
+                <p style="font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 16px;" th:text="${rev.question.questionText}">
+                    Question text
+                </p>
+
+                <!-- Options grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; margin-bottom: 16px;">
+                    <div style="padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);"
+                         th:styleappend="${rev.question.correctAnswer == 'A' ? 'background: #ecfdf5; border-color: #10b981; font-weight: 700;' : (rev.studentAnswer == 'A' && !rev.isCorrect ? 'background: #fef2f2; border-color: #ef4444;' : 'background: #ffffff;')}">
+                        <strong>A:</strong> <span th:text="${rev.question.optionA}">Option A</span>
+                    </div>
+                    <div style="padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);"
+                         th:styleappend="${rev.question.correctAnswer == 'B' ? 'background: #ecfdf5; border-color: #10b981; font-weight: 700;' : (rev.studentAnswer == 'B' && !rev.isCorrect ? 'background: #fef2f2; border-color: #ef4444;' : 'background: #ffffff;')}">
+                        <strong>B:</strong> <span th:text="${rev.question.optionB}">Option B</span>
+                    </div>
+                    <div style="padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);"
+                         th:styleappend="${rev.question.correctAnswer == 'C' ? 'background: #ecfdf5; border-color: #10b981; font-weight: 700;' : (rev.studentAnswer == 'C' && !rev.isCorrect ? 'background: #fef2f2; border-color: #ef4444;' : 'background: #ffffff;')}">
+                        <strong>C:</strong> <span th:text="${rev.question.optionC}">Option C</span>
+                    </div>
+                    <div style="padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);"
+                         th:styleappend="${rev.question.correctAnswer == 'D' ? 'background: #ecfdf5; border-color: #10b981; font-weight: 700;' : (rev.studentAnswer == 'D' && !rev.isCorrect ? 'background: #fef2f2; border-color: #ef4444;' : 'background: #ffffff;')}">
+                        <strong>D:</strong> <span th:text="${rev.question.optionD}">Option D</span>
+                    </div>
+                </div>
+
+                <div style="font-size: 13px; color: var(--navy-light); display: flex; gap: 20px;">
+                    <div>Your Choice: <strong th:text="${rev.studentAnswer}">A</strong></div>
+                    <div>Correct Answer: <strong style="color: var(--success);" th:text="${rev.correctAnswer}">B</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="text-align: center; margin-top: 30px; margin-bottom: 60px;">
+        <a th:if="${student != null}" href="/student/dashboard" class="btn btn-primary btn-lg">Return to Student Dashboard</a>
+        <a th:if="${admin != null}" href="/admin/dashboard" class="btn btn-primary btn-lg">Return to Admin Dashboard</a>
+    </div>
+
+</div>
+
+</body>
+</html>

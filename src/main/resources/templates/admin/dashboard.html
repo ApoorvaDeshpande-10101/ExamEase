@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Dashboard | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- Admin Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="brand-logo">Exam<span>Ease</span>.</a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-label">Admin Control</div>
+            <a href="/admin/dashboard" class="sidebar-item active">
+                <span>📊</span> Overview
+            </a>
+            <a href="/admin/exams" class="sidebar-item">
+                <span>📝</span> Examinations
+            </a>
+            <a href="/admin/students" class="sidebar-item">
+                <span>👥</span> Students
+            </a>
+            <a href="/admin/analytics" class="sidebar-item">
+                <span>📈</span> Analytics & Reports
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-badge">
+                <div class="user-avatar" style="background: var(--navy);" th:text="${#strings.substring(admin.name, 0, 1)}">A</div>
+                <div class="user-info">
+                    <div class="user-name" th:text="${admin.name}">Administrator</div>
+                    <div class="user-role">System Admin</div>
+                </div>
+            </div>
+            <a href="/logout" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 12px;">Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-navbar">
+            <h1 class="page-title">Administrator Dashboard</h1>
+            <div style="display: flex; gap: 10px;">
+                <a href="/admin/exams/create" class="btn btn-primary btn-sm">+ Create New Exam</a>
+            </div>
+        </header>
+
+        <div class="content-body">
+
+            <!-- Flash Error / Success Notifications -->
+            <div class="alert alert-success" th:if="${successMessage != null}">
+                <span>✓</span>
+                <span th:text="${successMessage}">Operation successful</span>
+            </div>
+            <div class="alert alert-danger" th:if="${errorMessage != null}">
+                <span>⚠️</span>
+                <span th:text="${errorMessage}">Error notification</span>
+            </div>
+
+            <!-- Stats Overview Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Registered Students</div>
+                        <div class="stat-value" th:text="${stats.totalStudents}">0</div>
+                    </div>
+                    <div class="stat-icon blue">👥</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Total Examinations</div>
+                        <div class="stat-value" th:text="${stats.totalExams}">0</div>
+                    </div>
+                    <div class="stat-icon purple">📑</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Total Attempts</div>
+                        <div class="stat-value" th:text="${stats.totalAttempts}">0</div>
+                    </div>
+                    <div class="stat-icon green">📝</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Platform Average</div>
+                        <div class="stat-value" th:text="${stats.averageScore + '%'}">0%</div>
+                    </div>
+                    <div class="stat-icon orange">📊</div>
+                </div>
+            </div>
+
+            <!-- Secondary Metrics Bar -->
+            <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 30px;">
+                <div class="card" style="padding: 18px 24px; margin-bottom: 0;">
+                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">Overall Pass Rate</div>
+                    <div style="font-size: 24px; font-weight: 800; color: var(--success);" th:text="${stats.passRate + '%'}">0%</div>
+                </div>
+                <div class="card" style="padding: 18px 24px; margin-bottom: 0;">
+                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">Top Performing Score</div>
+                    <div style="font-size: 24px; font-weight: 800; color: var(--primary);" th:text="${stats.highestScore + '%'}">0%</div>
+                </div>
+                <div class="card" style="padding: 18px 24px; margin-bottom: 0;">
+                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">Most Attempted Exam</div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                         th:text="${stats.mostAttemptedExam}">N/A</div>
+                </div>
+            </div>
+
+            <!-- Two-Column Layout: Recent Activity & Recent Attempts -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+                <!-- Real-Time Activity Feed -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Background System Activity</h2>
+                        <span class="badge badge-info">Multithreaded Feed</span>
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <div th:each="n : ${notifications}" style="padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px;">
+                            <div style="font-size: 18px; line-height: 1;">
+                                <span th:if="${n.type == 'EXAM_SUBMITTED'}">📥</span>
+                                <span th:if="${n.type == 'STUDENT_REGISTERED'}">👤</span>
+                                <span th:if="${n.type == 'TIMER_EXPIRED'}">⏰</span>
+                                <span th:if="${n.type == 'SYSTEM'}">⚙️</span>
+                                <span th:if="${n.type == 'EXAM_STARTED'}">⏳</span>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 13px; color: var(--navy); font-weight: 600;" th:text="${n.message}">Notification message</div>
+                                <div style="font-size: 11px; color: var(--muted); margin-top: 2px;" th:text="${#temporals.format(n.timestamp, 'hh:mm:ss a, dd MMM')}">Time</div>
+                            </div>
+                        </div>
+
+                        <div th:if="${notifications.isEmpty()}" style="text-align: center; padding: 30px; color: var(--muted);">
+                            No recent activity recorded yet.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Student Submissions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Recent Submissions</h2>
+                        <a href="/admin/analytics" class="btn btn-outline btn-sm">Full Analytics →</a>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Exam</th>
+                                        <th>Score</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="r : ${recentResults}">
+                                        <td th:text="${studentNames.get(r.studentId) != null ? studentNames.get(r.studentId) : 'Student'}">Student</td>
+                                        <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                            th:text="${examTitles.get(r.examId) != null ? examTitles.get(r.examId) : 'Exam'}">Exam</td>
+                                        <td>
+                                            <strong th:text="${r.percentage + '%'}">80%</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${r.status == 'PASS' ? 'badge-success' : 'badge-danger'}"
+                                                  th:text="${r.status}">PASS</span>
+                                        </td>
+                                        <td>
+                                            <a th:href="@{/admin/results/{id}(id=${r.id})}" class="btn btn-secondary btn-sm">Review</a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${recentResults.isEmpty()}">
+                                        <td colspan="5" style="text-align: center; padding: 30px; color: var(--muted);">
+                                            No examination attempts recorded yet.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

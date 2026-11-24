@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Examinations | ExamEase</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="brand-logo">Exam<span>Ease</span>.</a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-label">Student Menu</div>
+            <a href="/student/dashboard" class="sidebar-item">
+                <span>📊</span> Dashboard
+            </a>
+            <a href="/student/exams" class="sidebar-item active">
+                <span>📝</span> Available Exams
+            </a>
+            <a href="/student/results" class="sidebar-item">
+                <span>📈</span> My Results
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-badge">
+                <div class="user-avatar" th:text="${#strings.substring(student.name, 0, 1)}">S</div>
+                <div class="user-info">
+                    <div class="user-name" th:text="${student.name}">Student Name</div>
+                    <div class="user-role">Student</div>
+                </div>
+            </div>
+            <a href="/logout" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 12px;">Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-navbar">
+            <h1 class="page-title">Available Examinations</h1>
+            <a href="/student/dashboard" class="btn btn-secondary btn-sm">← Back to Dashboard</a>
+        </header>
+
+        <div class="content-body">
+
+            <!-- Flash Error Message -->
+            <div class="alert alert-danger" th:if="${errorMessage != null}">
+                <span>⚠️</span>
+                <span th:text="${errorMessage}">Error notification</span>
+            </div>
+
+            <div class="exam-grid">
+                <div class="exam-card" th:each="exam : ${exams}">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <h3 class="exam-card-title" th:text="${exam.title}">Java Programming</h3>
+                            <span class="badge badge-info" th:text="${exam.totalMarks + ' Marks'}">5 Marks</span>
+                        </div>
+                        <p class="exam-card-desc" th:text="${exam.description}">Exam description goes here.</p>
+                    </div>
+
+                    <div>
+                        <div class="exam-meta">
+                            <div class="exam-meta-item">⏱️ Duration: <span th:text="${exam.duration + ' mins'}">15 mins</span></div>
+                            <div class="exam-meta-item">❓ Questions: <span th:text="${exam.questions.size()}">5</span></div>
+                            <div class="exam-meta-item">🎯 Passing Marks: <span th:text="${exam.passingMarks}">3</span></div>
+                        </div>
+
+                        <div th:if="${attemptedExamIds.contains(exam.id)}">
+                            <span class="badge badge-success" style="padding: 10px 16px; font-size: 13px; width: 100%; justify-content: center;">✓ Completed</span>
+                        </div>
+                        <div th:unless="${attemptedExamIds.contains(exam.id)}">
+                            <a th:href="@{/student/exams/{id}/instructions(id=${exam.id})}" class="btn btn-primary" style="width: 100%;">
+                                Read Instructions & Start →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${exams.isEmpty()}" class="card p-4 text-center" style="padding: 60px 20px;">
+                <div style="font-size: 48px; margin-bottom: 12px;">📚</div>
+                <h3 style="color: var(--navy); margin-bottom: 8px;">No Examinations Published</h3>
+                <p style="color: var(--muted);">There are currently no active examinations published by administrators.</p>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
